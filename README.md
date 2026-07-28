@@ -2,7 +2,9 @@
 
 A cooperative codenames game for exactly two people, played by passing one device back and forth.
 
-No install, no server, no accounts — open `index.html` and play.
+**▶ Play it: [pretham42.github.io/codenames-duet](https://pretham42.github.io/codenames-duet/)**
+
+No install, no server, no accounts.
 
 ---
 
