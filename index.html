@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Duet — a codenames game for two</title>
+<meta name="description" content="A cooperative two-player codenames game. One device, passed back and forth. Fifteen agents, nine turns, and three assassins each.">
+<meta name="theme-color" content="#0b0e13">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕵️</text></svg>">
+</head>
+<body>
+
+<!-- ============ icon sprite ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-agent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 6 9 17l-5-5"/>
+    </symbol>
+    <symbol id="i-bystander" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>
+    </symbol>
+    <symbol id="i-assassin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M18 6 6 18M6 6l12 12"/>
+    </symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 11V6a1.5 1.5 0 0 0-3 0v5M15 11V4.5a1.5 1.5 0 0 0-3 0V11M12 11V5.5a1.5 1.5 0 0 0-3 0V13M9 13V8.5a1.5 1.5 0 0 0-3 0V15a6 6 0 0 0 6 6h1a6 6 0 0 0 6-6v-2.5a1.5 1.5 0 0 0-3 0"/>
+    </symbol>
+    <symbol id="i-radio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/>
+      <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/>
+    </symbol>
+    <symbol id="i-skull" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a8 8 0 0 0-8 8v3.5a2 2 0 0 0 1.2 1.8L7 16v3a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-3l1.8-.7A2 2 0 0 0 20 13.5V10a8 8 0 0 0-8-8Z"/>
+      <circle cx="9" cy="11" r="1.6" fill="currentColor"/><circle cx="15" cy="11" r="1.6" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+    </symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.7 6.2A9.9 9.9 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.4 7.6C3.7 9.3 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4.6-1.1"/>
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18"/>
+    </symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 21V4M5 4h11l-2 3.5L16 11H5"/>
+    </symbol>
+  </defs>
+</svg>
+
+
+<!-- ============================================================
+     SETUP
+     ============================================================ -->
+<section id="screen-setup" class="screen active">
+  <div class="wrap setup-wrap">
+
+    <div class="brand">
+      <div class="brand-eyebrow">Cooperative · Two players · One device</div>
+      <h1>DUET</h1>
+      <p>Fifteen agents hide in a grid of twenty-five codenames. You each see <b>half the key</b> — and neither half is the whole truth. Give one-word clues, find every agent, and don't touch an assassin.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Operatives</h2>
+      <p class="panel-hint">Names show up on the handoff screen so you always know whose turn it is.</p>
+      <div class="players">
+        <div class="player-field">
+          <label><span class="pdot p1"></span> Player one</label>
+          <input id="name1" type="text" maxlength="14" placeholder="Player 1" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="player-field">
+          <label><span class="pdot p2"></span> Player two</label>
+          <input id="name2" type="text" maxlength="14" placeholder="Player 2" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Word pack</h2>
+      <p class="panel-hint">Every board is 25 words drawn at random from the pack you pick.</p>
+      <div class="opt-grid cols-2" id="pack-grid"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Difficulty</h2>
+      <p class="panel-hint">Difficulty is your turn budget. Fewer turns, tighter clues.</p>
+      <div class="opt-grid cols-4" id="diff-grid"></div>
+    </div>
+
+    <div class="start-row">
+      <button id="btn-start" class="btn btn-primary btn-lg">Start mission</button>
+    </div>
+
+    <div class="record" id="record"></div>
+
+    <details class="rules" style="margin-top:24px">
+      <summary>How to play</summary>
+      <div class="rules-body">
+
+        <h3>The idea</h3>
+        <p style="margin-top:0">You're both on the same side. Twenty-five codenames sit on the table. Hidden among them are <b>15 agents</b> you need to contact — but you can only see part of the map, and so can your partner.</p>
+
+        <h3>Your key</h3>
+        <ul>
+          <li>Your key marks <b>9 agents</b> and <b>3 assassins</b>. Everything else is a bystander.</li>
+          <li>Your partner's key marks a different 9 and a different 3.</li>
+          <li>Only <b>3 agents</b> appear on both keys, so 9 + 9 overlaps down to <b>15 agents total</b>.</li>
+          <li>Here's the sting: a word that's a harmless bystander to you may be an <b>assassin</b> on your partner's key. You will never know which.</li>
+        </ul>
+
+        <h3>A turn</h3>
+        <ul>
+          <li>Say a <b>one-word clue</b> and a number — how many of your agents it points at. Type it in and hand the device over.</li>
+          <li>Your partner taps words. <b>Keep guessing as long as you're right</b> — there's no cap.</li>
+          <li>Tap a bystander and the turn ends. Tap an assassin and the mission is over.</li>
+          <li>You can stop guessing at any time. Stopping still costs a turn.</li>
+        </ul>
+
+        <h3>The clock</h3>
+        <ul>
+          <li>Every turn burns one token from your budget, whether it ended in a mistake or a voluntary stop.</li>
+          <li>Run out with agents still missing and you drop into <b>sudden death</b>: no more clues, just guesses from memory. One wrong tap and you lose.</li>
+        </ul>
+
+        <h3>Talking</h3>
+        <ul>
+          <li>Clue word plus number. That's it — no tone-of-voice hints, no "ooh, careful."</li>
+          <li>The clue can't be a word visible on the board, and it has to be about meaning, not spelling.</li>
+          <li>Compound words, proper nouns and names are fine. Play whatever you two agree on.</li>
+        </ul>
+
+        <h3>Reading the board</h3>
+        <ul>
+          <li>Cards outlined in <b>green</b> are your agents; the <b>dark red</b> ones are your assassins. You only see these while writing a clue.</li>
+          <li>A small dot in the corner during guessing is a quiet reminder of your own key — useful, since 3 of your agents are also your partner's.</li>
+          <li><b>Tan</b> cards have been confirmed innocent. The dot on them shows whose key cleared it — a card cleared on one key can still be an agent on the other.</li>
+        </ul>
+
+      </div>
+    </details>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     HANDOFF
+     ============================================================ -->
+<section id="screen-handoff" class="screen">
+  <div class="handoff-card">
+    <div class="handoff-badge" id="handoff-badge"><svg><use href="#i-hand"/></svg></div>
+    <div class="eyebrow">Eyes off, please</div>
+    <h2 id="handoff-name">Player 2</h2>
+    <p id="handoff-sub">Take the device. Your partner shouldn't see what comes next.</p>
+    <div class="handoff-clue" id="handoff-clue" hidden></div>
+    <button id="btn-handoff" class="btn btn-primary btn-lg">I'm ready</button>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     GAME
+     ============================================================ -->
+<section id="screen-game" class="screen">
+  <div class="wrap">
+    <div class="game-grid">
+
+      <div>
+        <div class="hud">
+          <div class="hud-turn"><span class="pdot" id="hud-dot"></span><span id="hud-who">Player 1</span></div>
+          <div class="hud-stats">
+            <div class="stat"><span>Agents</span><b id="stat-found">0/15</b></div>
+            <div class="stat" id="stat-turns-wrap"><span>Turns</span><b id="stat-turns">9</b><span class="tokens" id="tokens"></span></div>
+            <button class="icon-btn" id="btn-peek" title="Show or hide my key" aria-label="Show or hide my key"><svg><use href="#i-eye"/></svg></button>
+          </div>
+        </div>
+
+        <div class="banner" id="banner">
+          <div class="banner-icon"><svg><use href="#i-radio"/></svg></div>
+          <div class="banner-text">
+            <div class="banner-title" id="banner-title">Give a clue</div>
+            <div class="banner-sub" id="banner-sub">Your agents are outlined in green.</div>
+          </div>
+        </div>
+
+        <div class="board" id="board"></div>
+
+        <div class="actions" id="actions"></div>
+      </div>
+
+      <aside class="rail">
+        <div class="rail-box">
+          <h3>Transmission log</h3>
+          <div class="log-list" id="log"><div class="log-empty">No clues yet.</div></div>
+        </div>
+        <div class="rail-box legend-box">
+          <h3>Legend</h3>
+          <div class="legend-item"><span class="legend-swatch s-key-agent"></span><span><b>Your agent</b> — visible only while you're writing a clue.</span></div>
+          <div class="legend-item"><span class="legend-swatch s-key-assassin"></span><span><b>Your assassin</b> — never clue toward this.</span></div>
+          <div class="legend-item"><span class="legend-swatch s-found"></span><span><b>Found</b> — contacted, counts for both of you.</span></div>
+          <div class="legend-item"><span class="legend-swatch s-bystander"></span><span><b>Innocent</b> — the dot shows whose key cleared it. Still fair game on the other key.</span></div>
+          <div class="legend-item"><span class="legend-swatch s-plain"></span><span><b>Unknown</b> — nobody has touched it yet.</span></div>
+        </div>
+        <button class="btn btn-ghost" id="btn-quit">Abandon mission</button>
+      </aside>
+
+    </div>
+  </div>
+
+  <div class="result-overlay" id="result" hidden>
+    <div class="result-card" id="result-card">
+      <div class="rmark" id="result-mark"><svg><use href="#i-agent"/></svg></div>
+      <h2 id="result-title">Mission complete</h2>
+      <p id="result-text"></p>
+      <div class="result-stats">
+        <div><div class="rv" id="result-found">15</div><div class="rl">Agents found</div></div>
+        <div><div class="rv" id="result-turns">6</div><div class="rl">Clues sent</div></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-primary" id="btn-again">Play again</button>
+        <button class="btn btn-ghost" id="btn-study">Study the full key</button>
+        <button class="btn btn-ghost" id="btn-menu">Back to menu</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" id="btn-results" hidden>Show result</button>
+</section>
+
+<script src="words.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
